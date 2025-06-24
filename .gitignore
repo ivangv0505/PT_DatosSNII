@@ -1,0 +1,22 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Entornos virtuales
+env/
+venv/
+.venv/
+
+# Configuración local y credenciales
+.env
+config.ini
+*.db
+
+# Logs y salidas
+*.log
+
+# Archivos temporales del editor
+*.swp
+*.swo
+.vscode/
+.idea/
