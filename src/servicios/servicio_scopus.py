@@ -49,7 +49,7 @@ def servicioScopus(auid: str):
                 source_id        = doc.source_id,
                 publication_name = getattr(doc, "publicationName", None),
                 issn             = getattr(doc, "issn", None),
-                eissn            = getattr(doc, "eissn", None),
+                eissn            = getattr(doc, "eIssn", None),
                 aggregation_type = getattr(doc, "aggregationType", None)
             )
             RepoSource.guardar(src, conn)
@@ -101,7 +101,7 @@ def servicioScopus(auid: str):
             RepoPaper.guardar(p, conn)
 
              # Obtener (o crear) el tipo “Author keywords” Se modificara en el futuro para que sea configurable
-            author_kt_id = RepoKeywordType.get_or_create("Author keywords", conn) #guarda
+            author_kt_id = RepoKeywordType.obtener_o_crear("Author keywords", conn) #guarda
             #Keywords
             #Separa la cadena authkeywords por comas o punto y coma
             raw = doc.authkeywords or ""
