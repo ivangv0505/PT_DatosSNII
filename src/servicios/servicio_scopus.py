@@ -42,7 +42,7 @@ def servicioScopus(auid: str):
 
         #PUBLICACIONES (PAPERS)
         docs = author.get_documents(refresh=True)
-        for idx, doc in enumerate(docs, start=1):
+        for idx, doc in enumerate(docs, start=1): # se recorre cada documento del autor
 
             #Insertar o actualizar la fuente correspondiente
             src = Source(
@@ -53,22 +53,16 @@ def servicioScopus(auid: str):
                 aggregation_type = getattr(doc, "aggregationType", None)
             )
             RepoSource.guardar(src, conn)
-
-            #Relación PaperAuthor
-            pa = PaperAuthor(
-                paper_author_id   = idx,
-                eid               = doc.eid,
-                authors_scopus_id = au.author_scopus_id,
-                is_creator        = bool(doc.creator)
-            )
-            RepoPaperAuthor.guardar(pa, conn)
-
+            
             openA = doc.openaccess 
             if openA == 0:
                 openA = "No"
             else:
                 openA = "Si" 
+
             accesoFree = doc.freetoread or "No"
+            
+           
 
             accesoFreeL = doc.freetoreadLabel or ("Acceso libre" if openA == "Si" else "Acceso limitado")
             
@@ -99,6 +93,16 @@ def servicioScopus(auid: str):
                 freetoread_label    = accesoFreeL
             )
             RepoPaper.guardar(p, conn)
+
+
+            #Relación PaperAuthor
+            pa = PaperAuthor(
+                paper_author_id   = idx,
+                eid               = doc.eid,
+                authors_scopus_id = au.author_scopus_id,
+                is_creator        = bool(doc.creator)
+            )
+            RepoPaperAuthor.guardar(pa, conn)
 
              # Obtener (o crear) el tipo “Author keywords” Se modificara en el futuro para que sea configurable
             author_kt_id = RepoKeywordType.obtener_o_crear("Author keywords", conn) #guarda
