@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 @dataclass
 class AuthorPapersCites:
-    author_scopus_id: str  # FK → authors.author_scopus_id 
-    eid: str               # FK → papers.eid
+    author_scopus_id: str  
+    eid: str               
     year: int
     cites_count: int
