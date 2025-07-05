@@ -2,7 +2,7 @@ import pybliometrics
 pybliometrics.init()
 import re
 
-from pybliometrics.scopus import AuthorRetrieval
+from pybliometrics.scopus import AuthorRetrieval, AbstractRetrieval 
 from bd.bd_conexion import conexion
 from entidades.author import Author
 from entidades.paper import Paper
@@ -39,6 +39,13 @@ def servicioScopus(auid: str):
             cites_by_authors   = author.cited_by_count
         )
         RepoAuthor.guardar(au, conn)
+
+        author_kt_id = RepoKeywordType.guardar(
+            KeywordType(keyword_type_id=0, name="Por Autor"), conn
+        )
+        scopus_kt_id = RepoKeywordType.guardar(
+            KeywordType(keyword_type_id=0, name="Por Scopus"), conn
+        )
 
         #PUBLICACIONES (PAPERS)
         docs = author.get_documents(refresh=True)
@@ -104,19 +111,32 @@ def servicioScopus(auid: str):
             )
             RepoPaperAuthor.guardar(pa, conn)
 
-             # Obtener (o crear) el tipo “Author keywords” Se modificara en el futuro para que sea configurable
-            author_kt_id = RepoKeywordType.obtener_o_crear("Author keywords", conn) #guarda
-            #Keywords
-            #Separa la cadena authkeywords por comas o punto y coma
-            raw = doc.authkeywords or ""
-            palabras = [w.strip() for w in re.split(r"[;,]", raw) if w.strip()]
+           #Por Autor (las que escribe el autor en doc.authkeywords)
+            raw_auth = doc.authkeywords or ""
+            for palabra in [w.strip() for w in re.split(r"[;,]", raw_auth) if w.strip()]:
+                kw_id = RepoKeyword.guardar(
+                    Keyword(keyword_id=0, keyword=palabra, keyword_type_id=author_kt_id),
+                    conn
+                )
+                RepoPaperKeyword.guardar(
+                    PaperKeyword(eid=doc.eid, keyword_id=kw_id),
+                    conn
+                )
 
-            #Se inserta cada palabra
-            for palabra in palabras:
-                kw = Keyword(keyword_id=0, keyword=palabra, keyword_type_id=author_kt_id)
-                kw_id = RepoKeyword.guardar(kw, conn)
-                pk = PaperKeyword(eid=doc.eid, keyword_id=kw_id)
-                RepoPaperKeyword.guardar(pk, conn)
+            #keywords generadas por Scopus, con AbstractRetrieval
+            abs_doc = AbstractRetrieval(doc.eid, view="META_ABS")
+            for palabra in abs_doc.idxterms or []:
+                palabra = palabra.strip()
+                if not palabra:
+                    continue
+                kw_id = RepoKeyword.guardar(
+                    Keyword(keyword_id=0, keyword=palabra, keyword_type_id=scopus_kt_id),
+                    conn
+                )
+                RepoPaperKeyword.guardar(
+                    PaperKeyword(eid=doc.eid, keyword_id=kw_id),
+                    conn
+                )
 
         cur.execute("COMMIT;")
     except Exception:
