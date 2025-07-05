@@ -4,6 +4,7 @@ class RepoPaper:
     @staticmethod
     def guardar(p: Paper, conn):
         with conn.cursor() as cur:
+            # ON CONFLICT en eid: permite refrescar metadata (título, conteos, fechas, etc.)
             cur.execute("""
                 INSERT INTO papers (
                   eid, source_id, authors_ids,
@@ -24,7 +25,7 @@ class RepoPaper:
                   %s,%s,%s,
                   %s,%s
                 )
-                ON CONFLICT (eid) DO UPDATE
+                ON CONFLICT (eid) DO UPDATE   
                   SET authors_ids         = EXCLUDED.authors_ids,
                       doi                 = EXCLUDED.doi,
                       pii                 = EXCLUDED.pii,

@@ -4,6 +4,8 @@ class RepoSourceProductivity:
     @staticmethod
     def guardar(sp: SourceProductivity, conn):
         with conn.cursor() as cur:
+            #Los indicadores SJR, SNIP, CiteScore, etc. pueden cambiar año a año.
+            #ON CONFLICT en (source_id, year) permite actualizar los datos sin duplicar registros históricos.
             cur.execute("""
                 INSERT INTO sources_productivity (
                   source_id, year, SJR, SNIP,

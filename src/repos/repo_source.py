@@ -4,6 +4,8 @@ class RepoSource:
     @staticmethod
     def guardar(source: Source, conn):
         with conn.cursor() as cur:
+            # En caso de conflicto en source_id:
+            # Actualiza los datos (issn, eIssn, nombre, tipo) con los más recientes
             cur.execute("""
                 INSERT INTO sources (
                   source_id,

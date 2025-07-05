@@ -4,6 +4,9 @@ class RepoAuthor:
     @staticmethod
     def guardar(author: Author, conn):
         with conn.cursor() as cur:
+            # ON CONFLICT en la PK author_scopus_id permite:
+            # Mantener sincronizados cambios en metadata (nombre, ORCID, conteos)
+            # Ejecutar varias veces sin generar duplicados
             cur.execute("""
                 INSERT INTO authors (
                   author_scopus_id, cvu,

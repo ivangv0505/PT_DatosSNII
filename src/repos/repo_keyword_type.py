@@ -29,6 +29,8 @@ class RepoKeywordType:
     @staticmethod
     def guardar(kt: KeywordType, conn):
         with conn.cursor() as cur:
+            # Para renombrar o actualizar un tipo existente,
+            # ON CONFLICT evita tener que hacer SELECT antes.
             cur.execute("""
                 INSERT INTO keyword_types(keyword_type_id, name)
                 VALUES (%s, %s)
